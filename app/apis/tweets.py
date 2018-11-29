@@ -5,10 +5,18 @@ from app import db
 
 api = Namespace('tweets')
 
+class JsonUser(fields.Raw):
+    def format(self, value):
+        return {
+            'username': value.username,
+            'email': value.email
+        }
+
 json_tweet = api.model('Tweet', {
     'id': fields.Integer,
     'text': fields.String,
-    'created_at': fields.DateTime
+    'created_at': fields.DateTime,
+    'user': JsonUser
 })
 
 json_new_tweet = api.model('New tweet', {
@@ -47,10 +55,10 @@ class TweetResource(Resource):
             return None
 
 @api.route('')
-@api.response(422, 'Invalid tweet')
 class TweetsResource(Resource):
     @api.marshal_with(json_tweet, code=201)
     @api.expect(json_new_tweet, validate=True)
+    @api.response(422, 'Invalid tweet')
     def post(self):
         text = api.payload["text"]
         if len(text) > 0:
@@ -60,3 +68,8 @@ class TweetsResource(Resource):
             return tweet, 201
         else:
             return abort(422, "Tweet text can't be empty")
+
+    @api.marshal_list_with(json_tweet)
+    def get(self):
+        tweets = db.session.query(Tweet).all()
+        return tweets
