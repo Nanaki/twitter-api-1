@@ -15,6 +15,8 @@ gunicorn = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-script = "*"
+celery = {git = "https://github.com/celery/celery.git",ref = "master"}
+redis = "==2.10.6"
 
 [requires]
 python_version = "3.8"
